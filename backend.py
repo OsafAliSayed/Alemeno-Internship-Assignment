@@ -11,6 +11,7 @@ import glob
 
 
 MODEL = "llama3:latest"
+EMBEDDING_MODEL = "mxbai-embed-large"
 
 def get_text_from_pdf():
     print("Importing PDFs...")
@@ -18,7 +19,7 @@ def get_text_from_pdf():
     DIR = "./PDFS"
 
     # Get a list of all pdf files in the specified directory
-    pdf_files = glob.glob(os.path.join(DIR, 'google.pdf'))
+    pdf_files = glob.glob(os.path.join(DIR, '*.pdf'))
     
     text = ""
     for pdf_file in pdf_files:
@@ -30,17 +31,15 @@ def get_text_from_pdf():
 
 def get_text_chunks(text):
     print("Creating chunks...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=56)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=20)
     chunks = text_splitter.split_text(text)
     return chunks
 
-def get_vector_store(text_chunks, model=MODEL):  
+def get_vector_store(text_chunks, embedding_model=EMBEDDING_MODEL):  
     print("Adding chunks to vector store...")
-    embeddings = (
-        OllamaEmbeddings(model=model)
-    )
+    embeddings = OllamaEmbeddings(model=embedding_model)
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
-    vector_store.save_local("faiss_index_google")
+    vector_store.save_local("faiss_index")
     
 def get_conversational_chain(model=MODEL):
     print("making conversational chain...")
@@ -53,21 +52,19 @@ def get_conversational_chain(model=MODEL):
     """
     model = Ollama(
         model=model,
-        temperature = 0.8,
+        temperature = 0.5,
     )
     prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
     chain = LLMChain(llm=model, prompt=prompt)
     return chain
 
-def user_input(user_question, model=MODEL):
-    embeddings = (
-        OllamaEmbeddings(model=model)
-    )
-    new_db = FAISS.load_local("faiss_index_google", embeddings, allow_dangerous_deserialization=True)
+def user_input(user_question, embedding_model=EMBEDDING_MODEL):
+    embeddings = OllamaEmbeddings(model=embedding_model)
+    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question)
     chain = get_conversational_chain()
     response = chain.invoke({"context": docs, "question": user_question})
-    print(response, end="")
+    print(response['text'], end="")
     print()
     
 def main():
@@ -79,15 +76,8 @@ def main():
         inp = input("Press enter to ask another question or type 'exit' to exit: ")
 
 if __name__ == "__main__":
-    if not os.path.exists("./faiss_index_google"):
+    if not os.path.exists("./faiss_index"):
         text = get_text_from_pdf()
         text_chunks = get_text_chunks(text)
         get_vector_store(text_chunks)
     main()  
-# llm = Ollama(
-#     model="llama2"
-# )  # assuming you have Ollama installed and have llama3 model pulled with `ollama pull llama3 `
-
-# query = "Give me the name for my pet dog whose color is black."
-# for chunks in llm.stream(query):
-#     print(chunks, end="")

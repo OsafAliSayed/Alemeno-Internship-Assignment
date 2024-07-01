@@ -3,8 +3,11 @@ from backend import get_text_from_pdf, get_text_chunks, get_vector_store, get_co
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 import os 
+
+EMBEDDING_MODEL = "mxbai-embed-large"
+
 def chatbot_interface():
-    st.title("Chatbot Interface")
+    st.title("10-k Filings Chatbot")
     user_input = st.text_input("User Input", "")
     
     # Process user input and generate chatbot response
@@ -12,19 +15,19 @@ def chatbot_interface():
     if user_input != "":
         process_user_input(user_input)
 
-def process_user_input(user_question):
-    embeddings = (
-        OllamaEmbeddings()
-    )
+def process_user_input(user_question, embedding_model=EMBEDDING_MODEL):
+    
+    embeddings = OllamaEmbeddings(model=embedding_model)
     new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-    docs = new_db.similarity_search_with_score(user_question, k=10)
+    docs = new_db.similarity_search(user_question, k=10)
     chain = get_conversational_chain()
-    output = chain.invoke({"context": docs, "question": user_question})
-    st.write("Chatbot Response: ", output['text'])
+    response = chain.invoke({"context": docs, "question": user_question})
+    print(response['text'], end="")
+    st.write("Chatbot Response: ", response['text'])
     
     # write in sidebar
-    st.sidebar.write("Context ", output['context'])
-    # return response['output_text']
+    st.sidebar.write("Context ", response['context'])
+
 
 if __name__ == "__main__":
     if not os.path.exists("./faiss_index"):
