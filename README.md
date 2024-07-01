@@ -12,9 +12,20 @@ For setup I have used the following:
 4. Embedding Model: **mxbai-embed-large**
 5. LLM Model: **Llama3:latest**
 
-## Screenshots
+## UI Design and Sample Queries
+UI Design features a sidebar that shows all the text that was taken as context. Each element is a chunk of size 256 with an overlap of 20. For the given queries I took four relevant contexts.
+Here, are the response to the given questions:
 
-TODO
+![image](https://github.com/OsafAliSayed/Alemeno-Internship-Assignment/assets/99737087/a9bd705b-d804-4137-a6ff-88e7f7100d48)
+
+![image](https://github.com/OsafAliSayed/Alemeno-Internship-Assignment/assets/99737087/0a3ed295-6317-42cc-9498-edd6a565f267)
+
+![image](https://github.com/OsafAliSayed/Alemeno-Internship-Assignment/assets/99737087/a2d17b40-3402-4dc4-8719-4cc6953a9edb)
+
+We can take more chunks as reference to get detailed answers for same questions, as shown below:
+
+![image](https://github.com/OsafAliSayed/Alemeno-Internship-Assignment/assets/99737087/606dc421-17c8-4ae3-9398-103cb621521a)
+
 
 ## Development
 
@@ -27,7 +38,8 @@ TODO
 
 ## Prerequisites
 
-Use Ollama to download embedding and LLM models easily. Visit [Ollama official page](https://ollama.com/download).
+Use Ollama to download embedding and LLM models easily. Visit [Ollama official page](https://ollama.com/download). Make sure Ollama is running and you have downloaded the relevant models i.e. llama3 and mxbai-embed-large from ollama website.
+
 ## How to setup
 
 1. Clone the Github repo ```git clone https://github.com/OsafAliSayed/Alemeno-Internship-Assignment/```
